@@ -1,0 +1,67 @@
+{
+  "scenario": "normal",
+  "description": "Legitimate Airport_Free_WiFi infrastructure. Five APs advertise the SAME SSID with different BSSIDs - this is normal enterprise-style roaming coverage and must NOT be flagged. Every BSSID below is listed in sample_data/trusted_profiles.json.",
+  "trusted_profile": "Airport_Free_WiFi",
+  "networks": [
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:33",
+      "signal": -42,
+      "channel": 36,
+      "frequency": 5180,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:30:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:34",
+      "signal": -47,
+      "channel": 40,
+      "frequency": 5200,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:30:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:35",
+      "signal": -51,
+      "channel": 44,
+      "frequency": 5220,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:30:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:36",
+      "signal": -55,
+      "channel": 48,
+      "frequency": 5240,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:30:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:37",
+      "signal": -63,
+      "channel": 48,
+      "frequency": 5240,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:30:00+00:00"
+    }
+  ]
+}

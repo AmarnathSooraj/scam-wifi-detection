@@ -1,0 +1,25 @@
+# WiFiSentinel AI - detection engine dependencies
+#
+# Deliberately minimal. The engine is passive analysis over small numeric
+# feature vectors, so it needs exactly one machine-learning dependency.
+#
+# Install:
+#   python -m venv .venv
+#   .venv/bin/pip install -r ai/requirements.txt
+#
+# Note: the data models use the standard library `dataclasses` rather than
+# Pydantic. Validation is explicit and forgiving, which keeps this module
+# importable from FastAPI without pulling in a second framework. If the
+# backend team prefers Pydantic models at the HTTP boundary, convert
+# `DetectionResult` with `result.to_dict()` and validate there.
+#
+# Verified on:
+#   Python 3.14.6
+#   numpy 2.5.3
+#   scikit-learn 1.9.1
+numpy>=1.24
+scikit-learn>=1.3
+
+# Tests only - not needed to run the engine in production:
+#   .venv/bin/pip install pytest
+#   .venv/bin/python -m pytest ai/tests -q
