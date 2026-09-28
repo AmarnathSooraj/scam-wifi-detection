@@ -1,0 +1,17 @@
+# WiFiSentinel AI - Wi-Fi scanner
+#
+# This component intentionally has NO third-party Python dependencies.
+# Everything runs on the Python 3 standard library plus the system `nmcli`
+# binary, which keeps the scanner trivially portable to the backend service.
+#
+# Requirements verified on Arch Linux:
+#   Python >= 3.9
+#   networkmanager  (provides nmcli)
+#
+# The only entry needed to run the test suite is pytest, and even that is
+# optional - the tests are written with unittest and run standalone.
+#
+#   python scanner/tests/test_parser.py     # no install required
+#
+# Install pytest only if you prefer `python -m pytest`:
+#   pip install pytest

@@ -1,0 +1,25 @@
+# WiFiSentinel AI - full application dependencies
+#
+#   python -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# The analysis engine alone needs only the two entries below; the HTTP layer
+# is optional and only required for backend/main.py.
+#
+# The scanner (scanner/) has NO third-party Python dependencies - it shells
+# out to the system `nmcli` binary, which must be installed separately:
+#   Debian/Ubuntu : sudo apt install network-manager
+#   Arch          : sudo pacman -S networkmanager
+#   Fedora        : sudo dnf install NetworkManager
+
+# --- analysis engine ---
+numpy>=1.24
+scikit-learn>=1.3
+
+# --- HTTP API (only for backend/main.py) ---
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# --- tests ---
+pytest>=7.0

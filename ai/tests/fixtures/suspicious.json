@@ -1,0 +1,67 @@
+{
+  "scenario": "suspicious",
+  "description": "Attacker-style deviations on the Airport_Free_WiFi SSID. Every BSSID here is unknown to the trusted profile; the last entry adds OPEN security, a 2.4 GHz channel and a strong ML deviation, which is the controlled demo case from the project brief.",
+  "trusted_profile": "Airport_Free_WiFi",
+  "networks": [
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:33",
+      "signal": -42,
+      "channel": 36,
+      "frequency": 5180,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:31:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "AA:BB:CC:11:22:34",
+      "signal": -47,
+      "channel": 40,
+      "frequency": 5200,
+      "security": "WPA2",
+      "vendor": "Cisco",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T19:31:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "DD:EE:FF:00:11:22",
+      "signal": -38,
+      "channel": 44,
+      "frequency": 5220,
+      "security": "WPA2",
+      "vendor": "Raspberry Pi Trading Ltd",
+      "channel_width": 20,
+      "wifi_standard": "802.11n",
+      "timestamp": "2026-09-28T19:31:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "BB:CC:DD:44:55:66",
+      "signal": -41,
+      "channel": 6,
+      "frequency": 2437,
+      "security": "OPEN",
+      "vendor": "Raspberry Pi Trading Ltd",
+      "channel_width": 20,
+      "wifi_standard": "802.11n",
+      "timestamp": "2026-09-28T19:31:00+00:00"
+    },
+    {
+      "ssid": "Airport_Free_WiFi",
+      "bssid": "FF:00:11:22:33:44",
+      "signal": -35,
+      "channel": 12,
+      "frequency": 2462,
+      "security": "WEP",
+      "vendor": "Unknown",
+      "channel_width": 20,
+      "wifi_standard": "802.11b",
+      "timestamp": "2026-09-28T19:31:00+00:00"
+    }
+  ]
+}

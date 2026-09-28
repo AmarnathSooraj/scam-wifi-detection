@@ -1,0 +1,29 @@
+{
+  "profiles": [
+    {
+      "ssid": "CE-WIFI",
+      "known_bssids": [
+        "10:27:F5:F3:9B:B3",
+        "BC:07:1D:66:C2:E6",
+        "BC:07:1D:66:C2:E7"
+      ],
+      "security": [
+        "OPEN",
+        "WPA1/WPA2"
+      ],
+      "expected_channels": [
+        1,
+        11,
+        149
+      ],
+      "expected_frequencies": [
+        2412,
+        2462,
+        5745
+      ],
+      "known_vendors": [],
+      "location": null,
+      "provisional": false
+    }
+  ]
+}

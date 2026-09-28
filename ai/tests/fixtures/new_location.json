@@ -1,0 +1,76 @@
+{
+  "scenario": "new_location",
+  "description": "An airport the engine has never seen. There is NO trusted profile for these SSIDs, so unknown BSSIDs are expected and must not be treated as malicious. The last entry is the one entry whose fingerprint does not fit the rest of the same-SSID group, which is the interesting case here.",
+  "trusted_profile": null,
+  "networks": [
+    {
+      "ssid": "ZRH_Guest_WiFi",
+      "bssid": "11:22:33:44:55:01",
+      "signal": -49,
+      "channel": 36,
+      "frequency": 5180,
+      "security": "WPA2",
+      "vendor": "Aruba Networks",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    },
+    {
+      "ssid": "ZRH_Guest_WiFi",
+      "bssid": "11:22:33:44:55:02",
+      "signal": -54,
+      "channel": 40,
+      "frequency": 5200,
+      "security": "WPA2",
+      "vendor": "Aruba Networks",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    },
+    {
+      "ssid": "ZRH_Guest_WiFi",
+      "bssid": "11:22:33:44:55:03",
+      "signal": -58,
+      "channel": 44,
+      "frequency": 5220,
+      "security": "WPA2",
+      "vendor": "Aruba Networks",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    },
+    {
+      "ssid": "ZRH_Guest_WiFi",
+      "bssid": "99:88:77:66:55:0A",
+      "signal": -33,
+      "channel": 11,
+      "frequency": 2462,
+      "security": "OPEN",
+      "vendor": "Raspberry Pi Trading Ltd",
+      "channel_width": 20,
+      "wifi_standard": "802.11n",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    },
+    {
+      "ssid": "ZRH_Free_Public",
+      "bssid": "11:22:33:44:55:11",
+      "signal": -61,
+      "channel": 48,
+      "frequency": 5240,
+      "security": "WPA2",
+      "vendor": "Aruba Networks",
+      "channel_width": 80,
+      "wifi_standard": "802.11ac",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    },
+    {
+      "ssid": "Airport_Flight_Info_Free",
+      "bssid": "11:22:33:44:55:21",
+      "signal": -66,
+      "channel": 6,
+      "frequency": 2437,
+      "security": "OPEN",
+      "timestamp": "2026-09-28T20:05:00+00:00"
+    }
+  ]
+}

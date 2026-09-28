@@ -1,0 +1,29 @@
+{
+  "description": "Trusted wireless profiles for the demo. These represent infrastructure an administrator has explicitly vouched for. Any BSSID absent from here is simply 'not yet verified' - it is not treated as malicious on that basis alone.",
+  "profiles": [
+    {
+      "ssid": "Airport_Free_WiFi",
+      "location": "Terminal 2, Gates A-D",
+      "known_bssids": [
+        "AA:BB:CC:11:22:33",
+        "AA:BB:CC:11:22:34",
+        "AA:BB:CC:11:22:35",
+        "AA:BB:CC:11:22:36",
+        "AA:BB:CC:11:22:37"
+      ],
+      "security": ["WPA2"],
+      "expected_channels": [36, 40, 44, 48],
+      "expected_frequencies": [5180, 5200, 5220, 5240],
+      "known_vendors": ["Cisco"]
+    },
+    {
+      "ssid": "Corporate_Office_5G",
+      "location": "HQ, floors 1-4",
+      "known_bssids": ["A0:B1:C2:D3:E4:F0", "A0:B1:C2:D3:E4:F1"],
+      "security": ["WPA2", "WPA2/WPA3"],
+      "expected_channels": [36, 40, 44, 48],
+      "expected_frequencies": [5180, 5200, 5220, 5240],
+      "known_vendors": ["Ubiquiti", "Arista"]
+    }
+  ]
+}
