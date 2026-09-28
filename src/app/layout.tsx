@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "AI-powered wireless security monitoring and access point risk analysis.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>{children}</body>

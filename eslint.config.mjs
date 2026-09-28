@@ -12,6 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Python side of this project. Without these, eslint descends into
+    // .venv (site-packages) and reports warnings against third-party
+    // JavaScript shipped inside sklearn, which are not ours to fix.
+    ".venv/**",
+    "**/__pycache__/**",
+    ".pytest_cache/**",
+    // Source trees of the analysis engine, scanner and API.
+    "ai/**",
+    "scanner/**",
+    "backend/**",
   ]),
 ]);
 

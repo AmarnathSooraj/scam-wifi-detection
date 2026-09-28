@@ -34,14 +34,25 @@ exposing it.
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from ai.pipeline import analyze_scan, clear_detector_cache
 from ai.profile_store import ProfileStore, build_profile_from_observations
 from scanner import ScannerError, scan_wifi
+
+#: Origins allowed to call this service from a browser. The Next.js dev server
+#: is a different origin from the API, so without this every request fails the
+#: preflight and the dashboard can never load data. Restricted to localhost
+#: because the /trust routes are unauthenticated - see the module docstring.
+ALLOWED_ORIGINS = os.environ.get(
+    "WIFISENTINEL_CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+).split(",")
 
 
 #: Trusted-network configuration, loaded from disk. Re-read per request rather
@@ -68,6 +79,16 @@ app = FastAPI(
     title="WiFiSentinel AI",
     version="1.0.0",
     description="Passive Wi-Fi rogue-AP detection. Real scans, explainable risk scores.",
+)
+
+# A browser on :3000 calling the API on :8000 is cross-origin. Without this
+# middleware the preflight fails and the dashboard silently shows no data.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 

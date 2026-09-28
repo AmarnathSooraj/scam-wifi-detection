@@ -22,6 +22,10 @@
         5745
       ],
       "known_vendors": [],
+      "known_ouis": [
+        "10:27:F5",
+        "BC:07:1D"
+      ],
       "location": null,
       "provisional": false
     }
