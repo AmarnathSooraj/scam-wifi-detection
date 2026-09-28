@@ -9,10 +9,14 @@ unavailable the endpoint returns 503 with the reason - it never invents data.
 
 Endpoints
 ---------
-``GET  /health``    liveness, static by design
-``GET  /profiles``  which SSIDs this site has vouched for
-``POST /scan``      REAL scan_wifi() -> real analysis -> JSON
-``POST /analyze``   analyse observations the caller supplies (no scan)
+``GET  /health``        liveness, static by design
+``GET  /verdicts``      the verdict vocabulary and the accuracy caveat
+``GET  /flagged``       only the access points worth a human's attention
+``GET  /profiles``      which SSIDs this site has vouched for
+``POST /scan``          REAL scan_wifi() -> real analysis -> JSON
+``POST /analyze``       analyse observations the caller supplies (no scan)
+``POST /trust``         record an observed SSID as operator-approved (writes)
+``DELETE /trust/{ssid}`` remove a trusted profile (writes)
 
 ``/scan`` is the endpoint a dashboard should poll. ``/analyze`` exists so the
 engine can be exercised against stored or replayed observations without
@@ -20,18 +24,23 @@ occupying the radio; it is explicitly not a scan.
 
 Security boundary: passive observation and analysis only. This service never
 transmits, injects, deauthenticates, or associates with any network.
+
+Authentication: none of the routes are authenticated here, which is fine for a
+single-operator tool but not for a shared deployment. The ``/trust`` routes
+are the ones that matter - a caller who can write the profile store can silence
+detection for any network by trusting it. Put the service behind authz before
+exposing it.
 """
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from ai.pipeline import analyze_scan
-from ai.profile_store import ProfileStore
+from ai.pipeline import analyze_scan, clear_detector_cache
+from ai.profile_store import ProfileStore, build_profile_from_observations
 from scanner import ScannerError, scan_wifi
 
 
@@ -55,17 +64,10 @@ def _load_profiles() -> List[Any]:
         ) from exc
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.state.profile_store = ProfileStore()
-    yield
-
-
 app = FastAPI(
     title="WiFiSentinel AI",
     version="1.0.0",
     description="Passive Wi-Fi rogue-AP detection. Real scans, explainable risk scores.",
-    lifespan=lifespan,
 )
 
 
@@ -74,23 +76,22 @@ app = FastAPI(
 # ---------------------------------------------------------------------------
 
 
-class ObservationIn(BaseModel):
-    """One observed access point.
+class TrustIn(BaseModel):
+    """Request body for recording a network as trusted.
 
-    Only ``bssid`` is required in practice; everything else is optional
-    because a beacon may be partially observed and the engine degrades
-    gracefully rather than rejecting it. Field aliases (``signal_dbm``,
-    ``frequency_mhz``, ``is_hidden``, ``observed_at``) are also accepted.
+    ``ssid`` is required because it names the network being approved. The
+    BSSIDs, security and channels are **not** supplied by the caller: they are
+    always read from a real scan, so a caller cannot hand-write a profile that
+    vouches for hardware it never observed.
     """
 
-    ssid: Optional[str] = None
-    bssid: Optional[str] = None
-    signal: Optional[int] = Field(None, description="RSSI in dBm")
-    channel: Optional[int] = None
-    frequency: Optional[int] = Field(None, description="Centre frequency in MHz")
-    security: Optional[str] = None
-    timestamp: Optional[str] = None
-    vendor: Optional[str] = None
+    ssid: str = Field(..., min_length=1, description="Exact SSID as broadcast.")
+    interface: Optional[str] = Field(None, description="Force a Wi-Fi interface.")
+    settle: float = Field(20.0, ge=0.0, le=120.0, description="Seconds to wait for the scan.")
+    location: Optional[str] = Field(None, description="Human label, e.g. 'Terminal 2, Gate B'.")
+    include_vendors: bool = Field(
+        False, description="Record vendor strings (least reliable attribute; off by default)."
+    )
 
 
 class AnalyzeIn(BaseModel):
@@ -161,6 +162,108 @@ def profiles() -> Dict[str, Any]:
         "ssids": [profile.ssid for profile in loaded],
         "store_path": str(ProfileStore().path),
     }
+
+
+@app.post("/trust", status_code=201)
+def trust(payload: TrustIn) -> Dict[str, Any]:
+    """Record a currently-observed SSID as operator-approved infrastructure.
+
+    This is the HTTP equivalent of ``python run_scan.py --trust "SSID"``, and
+    carries the same guarantee: a profile can only be **earned from a real
+    scan**. The caller names the SSID, the adapter supplies the BSSIDs,
+    security and channels. Nothing is hand-written, so a profile cannot vouch
+    for hardware this machine never heard.
+
+    This endpoint writes to the profile store. It is deliberately the only
+    mutating route in the service, and it should sit behind authentication in
+    any real deployment - an unauthenticated caller who can write the store can
+    silence detection for any network by trusting it.
+    """
+    try:
+        result = scan_wifi(interface=payload.interface, settle=payload.settle)
+    except ScannerError as exc:
+        # A profile built without a scan would be fiction, so refuse rather
+        # than store something unverifiable.
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": type(exc).__name__,
+                "message": str(exc),
+                "hint": "Recording a trusted network requires a real scan of the local adapter.",
+            },
+        ) from exc
+
+    observed: List[Dict[str, Any]] = [n.to_dict() for n in result.networks]
+    matches = [n for n in observed if (n.get("ssid") or "") == payload.ssid]
+    if not matches:
+        available = sorted({n.get("ssid") for n in observed if n.get("ssid")})
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "SSIDNotObserved",
+                "message": f"{payload.ssid!r} was not observed in this scan.",
+                "observed_ssids": available,
+                "hint": "The SSID must match exactly, including case and spacing.",
+            },
+        )
+
+    profile = build_profile_from_observations(
+        payload.ssid, observed, location=payload.location, include_vendors=payload.include_vendors
+    )
+    if profile is None:  # pragma: no cover - matches is non-empty, so unreachable
+        raise HTTPException(
+            status_code=422,
+            detail={"error": "NoUsableObservations", "message": "No usable beacons for that SSID."},
+        )
+
+    store = ProfileStore()
+    try:
+        store.upsert(profile)
+    except ValueError as exc:
+        # ``upsert`` reads the current file first. If that file is corrupt we
+        # must NOT write over it: the operator's configuration would be lost,
+        # and every network would silently fall back to UNVERIFIED. Refuse and
+        # tell them to fix the file, same as the read path does.
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "ProfileStoreError",
+                "message": str(exc),
+                "hint": f"Refusing to overwrite an unreadable profile file. Fix or delete {store.path}.",
+            },
+        ) from exc
+    # The per-profile detector cache is keyed on profile content, so a changed
+    # profile naturally gets a fresh baseline on its next scan. Clearing is
+    # still correct hygiene: it releases the forests built for the old profile.
+    clear_detector_cache()
+    return {
+        "trusted": profile.ssid,
+        "known_bssids": profile.known_bssids,
+        "security": profile.security,
+        "expected_channels": profile.expected_channels,
+        "expected_frequencies": profile.expected_frequencies,
+        "known_ouis": profile.known_ouis,
+        "location": profile.location,
+        "store_path": str(store.path),
+        "scan_timestamp": result.timestamp,
+    }
+
+
+@app.delete("/trust/{ssid}")
+def untrust(ssid: str) -> Dict[str, Any]:
+    """Remove a trusted profile. Future observations are UNVERIFIED again.
+
+    Deliberately not a scan: the store is source-of-truth configuration, so
+    deleting from it needs no radio access and stays fast and available.
+    """
+    store = ProfileStore()
+    if not store.remove(ssid):
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NotTrusted", "message": f"{ssid!r} is not in the profile store."},
+        )
+    clear_detector_cache()
+    return {"untrusted": ssid, "store_path": str(store.path)}
 
 
 @app.post("/scan")
